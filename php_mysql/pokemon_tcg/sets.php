@@ -1,4 +1,20 @@
 <?php
+session_start(); // Démarrage ou reprise de la session
+
+// Vérification si l'utilisateur est connecté avec la session "user"
+if (!isset($_SESSION["user"])) {
+    session_unset();
+    header("Location: index.php"); // Redirection
+    exit;
+}
+
+// Vérification si l'utilisateur a cliqué sur le lien de déconnexion avec le paramètre GET
+if (isset($_GET['action']) && $_GET['action'] == 'disconnection') {
+    session_unset();
+    header("Location: index.php"); // Redirection
+    exit;
+}
+
 require 'vendor/autoload.php'; // Charge automatique des classes Composer
 require 'db.php'; // Connexion à la BDD
 
@@ -185,18 +201,14 @@ try {
             padding: 0;
             box-sizing: border-box;
             object-fit: contain;
+            background-color: transparent;
         }
         html, body {
             height: auto;
         }
         body {
-            background-color: #14A8E9;
+            background: linear-gradient(#14A8E9 1000px, #EED149);
             text-align: center;
-            overflow-x: hidden;
-        }
-        .main-content {
-            padding: 20px;
-            padding-left: 160px;
         }
 
         /* --- Style du swiper des logos --- */
@@ -224,7 +236,7 @@ try {
             position: absolute;
             top: 50%;
             z-index: 1;
-            color: #EED149;
+            color: #FBC32C;
             font-size: 30px;
             font-weight: bold;
             cursor: pointer;
@@ -240,7 +252,7 @@ try {
         .swiper-pagination-bullet {
             width: 10px;
             height: 10px;
-            background-color: #EED149;
+            background-color: #FBC32C;
         }
 
         /* --- Style du swiper des cartes --- */
@@ -275,7 +287,7 @@ try {
             background-color: rgba(0, 0, 0, 0.7);
             align-items: center;
             justify-content: center;
-            z-index: 10;
+            z-index: 100;
         }
         .modal img {
             max-width: 270px;
@@ -303,7 +315,7 @@ try {
             background-color: #fff;
             color: #777;
             box-shadow: 0 2px 6px rgba(0, 0, 0, 0.5);
-            transition: background-color 0.3s ease, transform 0.2s ease, color 0.3s ease;
+            transition: background-color 0.3s ease, transform 0.3s ease, color 0.3s ease;
             font-family: Verdana, Arial, Helvetica, sans-serif;
             cursor: pointer;
         }
@@ -335,7 +347,7 @@ try {
             border-radius: 50%;
             background-color: #fff;
             color: #E01C2F;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.5);
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.5);
             transition: background-color 0.3s ease, transform 0.3s ease, color 0.3s ease;
             font-family: Verdana, Arial, Helvetica, sans-serif;
             cursor: pointer;
@@ -355,167 +367,165 @@ try {
 </head>
 
 <body>
-    <?php include 'sidebar.php'; ?>
+    <?php if (isset($errorMessage)): ?>
+        <!-- Affiche un message d'erreur si une exception a été capturée -->
+        <p class="error"><?= htmlspecialchars($errorMessage) ?></p>
+    <?php else: ?>
 
-    <section class="main-content">
-        <?php if (isset($errorMessage)): ?>
-            <!-- Affiche un message d'erreur si une exception a été capturée -->
-            <p class="error"><?= htmlspecialchars($errorMessage) ?></p>
-        <?php else: ?>
-            <!-- Swiper des logos des sets -->
-            <div class="logos-container">
-                <div class="swiper">
-                    <div class="swiper-wrapper">
-                        <?php foreach ($setsData as $set): ?>
-                            <div class="swiper-slide">
-                                <a href="set_cards.php?set=<?= htmlspecialchars($set['id']) ?>">
-                                    <img class="set-logo" src="<?= htmlspecialchars($set['logo']) ?>" alt="Set Logo">
-                                </a>
-                            </div>
+    <?php include 'sidebar.php'; ?><?php endif; ?>
+
+    <!-- Swiper des logos des sets -->
+    <div class="logos-container">
+        <div class="swiper">
+            <div class="swiper-wrapper">
+                <?php foreach ($setsData as $set): ?>
+                    <div class="swiper-slide">
+                        <a href="set_cards.php?set=<?= htmlspecialchars($set['id']) ?>">
+                            <img class="set-logo" src="<?= htmlspecialchars($set['logo']) ?>" alt="Set Logo">
+                        </a>
+                    </div>
+                <?php endforeach; ?>
+            </div>
+        </div>
+        <!-- Flèches de navigation et pagination -->
+        <div class="swiper-button-prev"></div>
+        <div class="swiper-button-next"></div>
+        <div class="swiper-pagination"></div>
+    </div>
+
+    <!-- Swiper des cartes de chaque set -->
+    <div class="swiper">
+        <div class="swiper-wrapper">
+            <?php foreach ($setsData as $set): ?>
+                <div class="swiper-slide">
+                    <div class="cards-container">
+                        <?php foreach ($set['cards'] as $card): ?>
+                            <img src="<?= htmlspecialchars($card['image_small']) ?>"
+                                    alt="<?= htmlspecialchars($card['name']) ?>" 
+                                    class="card-img" 
+                                    data-id="<?= htmlspecialchars($card['id']) ?>"
+                                    data-set="<?= htmlspecialchars($set['id']) ?>" />
                         <?php endforeach; ?>
                     </div>
                 </div>
-                <!-- Flèches de navigation et pagination -->
-                <div class="swiper-button-prev"></div>
-                <div class="swiper-button-next"></div>
-                <div class="swiper-pagination"></div>
-            </div>
-
-            <!-- Swiper des cartes de chaque set -->
-            <div class="swiper">
-                <div class="swiper-wrapper">
-                    <?php foreach ($setsData as $set): ?>
-                        <div class="swiper-slide">
-                            <div class="cards-container">
-                                <?php foreach ($set['cards'] as $card): ?>
-                                    <img src="<?= htmlspecialchars($card['image_small']) ?>"
-                                         alt="<?= htmlspecialchars($card['name']) ?>" 
-                                         class="card-img" 
-                                         data-id="<?= htmlspecialchars($card['id']) ?>"
-                                         data-set="<?= htmlspecialchars($set['id']) ?>" />
-                                <?php endforeach; ?>
-                            </div>
-                        </div>
-                    <?php endforeach; ?>
-                </div>
-            </div>
-        <?php endif; ?>
-
-        <!-- Modale pour afficher une carte agrandie -->
-        <div class="modal" id="modal">
-            <span class="close-btn" id="close-btn">&times;</span>
-            <span id="favorite-btn" class="favorite-btn">
-                <p>&#9825;</p>
-            </span>
-            <img id="modal-image" src="" alt="Card Image" data-id="" data-set="">
+            <?php endforeach; ?>
         </div>
+    </div>
 
-        <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
-        <script>
-            // Initialisation de Swiper
-            var swiper = new Swiper(".swiper", {
-                slidesPerView: 1,
-                spaceBetween: 500,
-                loop: true,
-                autoHeight: true,
-                allowTouchMove: false,
-                pagination: {
-                    el: ".swiper-pagination",
-                },
-                navigation: {
-                    nextEl: ".swiper-button-next",
-                    prevEl: ".swiper-button-prev",
-                },
-            });
+    <!-- Modale pour afficher une carte agrandie -->
+    <div class="modal" id="modal">
+        <span class="close-btn" id="close-btn">&times;</span>
+        <span id="favorite-btn" class="favorite-btn">
+            <p>&#9825;</p>
+        </span>
+        <img id="modal-image" src="" alt="Card Image" data-id="" data-set="">
+    </div>
 
-            // Gestion du clic sur une carte pour ouvrir la modale
-            document.querySelectorAll('.card-img').forEach(card => {
-                card.addEventListener('click', function() {
-                    const cardId = this.getAttribute('data-id');
-                    const setId = this.getAttribute('data-set');
-                    const imageSrc = this.getAttribute('src');
+    <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+    <script>
+        // Initialisation de Swiper
+        var swiper = new Swiper(".swiper", {
+            slidesPerView: 1,
+            spaceBetween: 500,
+            loop: true,
+            autoHeight: true,
+            allowTouchMove: false,
+            pagination: {
+                el: ".swiper-pagination",
+            },
+            navigation: {
+                nextEl: ".swiper-button-next",
+                prevEl: ".swiper-button-prev",
+            },
+        });
 
-                    const modal = document.getElementById('modal');
-                    const modalImage = document.getElementById('modal-image');
-                    modalImage.src = imageSrc;
-                    modalImage.setAttribute('data-id', cardId);
-                    modalImage.setAttribute('data-set', setId);
-
-                    fetch('favorite.php', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify({
-                            cardId: cardId,
-                            action: 'check'
-                        })
-                    })
-                    .then(response => response.json())
-                    .then(data => {
-                        const favoriteBtn = document.getElementById('favorite-btn');
-                        if (data.isFavorite) {
-                            favoriteBtn.classList.add('active');
-                        } else {
-                            favoriteBtn.classList.remove('active');
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Error:', error);
-                    });
-
-                    modal.style.display = 'flex';
-                });
-            });
-
-            // Ajout d'une carte en favori
-            document.getElementById('favorite-btn').addEventListener('click', function() {
-                const modalImage = document.getElementById('modal-image');
-                const cardId = modalImage.getAttribute('data-id');
-                const favoriteBtn = this;
-
-                if (cardId) {
-                    const isActive = favoriteBtn.classList.contains('active');
-
-                    fetch('favorite.php', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify({
-                            cardId: cardId,
-                            action: isActive ? 'remove' : 'add'
-                        })
-                    })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.success) {
-                            favoriteBtn.classList.toggle('active');
-                        } else {
-                            console.error('Error');
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Error AJAX:', error);
-                    });
-                }
-            });
-
-            // Redirection vers la page d'une carte depuis la modale
-            document.getElementById('modal-image').addEventListener('click', function () {
+        // Gestion du clic sur une carte pour ouvrir la modale
+        document.querySelectorAll('.card-img').forEach(card => {
+            card.addEventListener('click', function() {
                 const cardId = this.getAttribute('data-id');
                 const setId = this.getAttribute('data-set');
-                if (cardId && setId) {
-                    window.location.href = `set_cards.php?id=${cardId}&set=${setId}`;
-                }
-            });
+                const imageSrc = this.getAttribute('src');
 
-            // Fermeture de la modale
-            document.getElementById('close-btn').addEventListener('click', function() {
-                document.getElementById('modal').style.display = 'none';
-                document.getElementById('favorite-btn').classList.remove('active');
+                const modal = document.getElementById('modal');
+                const modalImage = document.getElementById('modal-image');
+                modalImage.src = imageSrc;
+                modalImage.setAttribute('data-id', cardId);
+                modalImage.setAttribute('data-set', setId);
+
+                fetch('favorite.php', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        cardId: cardId,
+                        action: 'check'
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    const favoriteBtn = document.getElementById('favorite-btn');
+                    if (data.isFavorite) {
+                        favoriteBtn.classList.add('active');
+                    } else {
+                        favoriteBtn.classList.remove('active');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                });
+
+                modal.style.display = 'flex';
             });
-        </script>
-    </section>
+        });
+
+        // Ajout d'une carte en favori
+        document.getElementById('favorite-btn').addEventListener('click', function() {
+            const modalImage = document.getElementById('modal-image');
+            const cardId = modalImage.getAttribute('data-id');
+            const favoriteBtn = this;
+
+            if (cardId) {
+                const isActive = favoriteBtn.classList.contains('active');
+
+                fetch('favorite.php', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        cardId: cardId,
+                        action: isActive ? 'remove' : 'add'
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        favoriteBtn.classList.toggle('active');
+                    } else {
+                        console.error('Error');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error AJAX:', error);
+                });
+            }
+        });
+
+        // Redirection vers la page d'une carte depuis la modale
+        document.getElementById('modal-image').addEventListener('click', function () {
+            const cardId = this.getAttribute('data-id');
+            const setId = this.getAttribute('data-set');
+            if (cardId && setId) {
+                window.location.href = `set_cards.php?id=${cardId}&set=${setId}`;
+            }
+        });
+
+        // Fermeture de la modale
+        document.getElementById('close-btn').addEventListener('click', function() {
+            document.getElementById('modal').style.display = 'none';
+            document.getElementById('favorite-btn').classList.remove('active');
+        });
+    </script>
 </body>
 </html>

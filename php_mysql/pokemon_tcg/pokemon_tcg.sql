@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Hôte : 127.0.0.1:3306
--- Généré le : dim. 27 avr. 2025 à 16:27
+-- Généré le : lun. 28 avr. 2025 à 20:02
 -- Version du serveur : 9.1.0
 -- Version de PHP : 8.3.14
 
@@ -342,6 +342,27 @@ INSERT INTO `sets` (`id`, `json_data`) VALUES
 (1, '{\"id\":\"base1\",\"name\":\"Base\",\"series\":\"Base\",\"printedTotal\":102,\"total\":102,\"legalities\":{\"unlimited\":\"Legal\"},\"ptcgoCode\":\"BS\",\"releaseDate\":\"1999\\/01\\/09\",\"updatedAt\":\"2022\\/10\\/10 15:12:00\",\"images\":{\"symbol\":\"https:\\/\\/images.pokemontcg.io\\/base1\\/symbol.png\",\"logo\":\"https:\\/\\/images.pokemontcg.io\\/base1\\/logo.png\"}}'),
 (2, '{\"id\":\"base2\",\"name\":\"Jungle\",\"series\":\"Base\",\"printedTotal\":64,\"total\":64,\"legalities\":{\"unlimited\":\"Legal\"},\"ptcgoCode\":\"JU\",\"releaseDate\":\"1999\\/06\\/16\",\"updatedAt\":\"2020\\/08\\/14 09:35:00\",\"images\":{\"symbol\":\"https:\\/\\/images.pokemontcg.io\\/base2\\/symbol.png\",\"logo\":\"https:\\/\\/images.pokemontcg.io\\/base2\\/logo.png\"}}'),
 (3, '{\"id\":\"base3\",\"name\":\"Fossil\",\"series\":\"Base\",\"printedTotal\":62,\"total\":62,\"legalities\":{\"unlimited\":\"Legal\"},\"ptcgoCode\":\"FO\",\"releaseDate\":\"1999\\/10\\/10\",\"updatedAt\":\"2020\\/08\\/14 09:35:00\",\"images\":{\"symbol\":\"https:\\/\\/images.pokemontcg.io\\/base3\\/symbol.png\",\"logo\":\"https:\\/\\/images.pokemontcg.io\\/base3\\/logo.png\"}}');
+
+-- --------------------------------------------------------
+
+--
+-- Structure de la table `users`
+--
+
+DROP TABLE IF EXISTS `users`;
+CREATE TABLE IF NOT EXISTS `users` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `email` varchar(100) NOT NULL,
+  `password` varchar(100) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=MyISAM AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+--
+-- Déchargement des données de la table `users`
+--
+
+INSERT INTO `users` (`id`, `email`, `password`) VALUES
+(1, 'remi.muret@gmail.com', '$2y$10$XZgPUkWMyiOguffxuHX9u.yCWGGBq4cca.KP3hyI1mge3R8nDOMAW');
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;

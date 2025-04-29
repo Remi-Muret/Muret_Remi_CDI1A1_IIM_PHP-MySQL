@@ -2,17 +2,13 @@
 session_start(); // Démarrage ou reprise de la session
 require_once("db.php"); // Récupération de la connexion
 
+$error = ""; // Initialisation du message d'erreur
+
 // Vérification si le formulaire a été soumis
 if ($_POST) {
     // Nettoyage des données envoyées via le formulaire
     $email = trim($_POST['email']);
     $password = trim($_POST['password']);
-
-    // Vérification de la validité de l'email
-    if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-        echo "Not valid email.";
-        exit;
-    }
 
     // Requête SQL sécurisée
     $stmt = $pdo->prepare("SELECT * FROM users WHERE email = :email");
@@ -29,7 +25,7 @@ if ($_POST) {
         header("Location: sets.php"); // Redirection
         exit;
     } else {
-        echo "Incorrect email or password.";
+        $error = "Incorrect email or password.";
     }
 }
 ?>
@@ -105,7 +101,12 @@ if ($_POST) {
 </head>
 <body>
     <div class="container">
+
         <h1>Connection</h1>
+
+        <?php if ($error): ?>
+            <p style="color:red"><?= htmlspecialchars($error) ?></p>
+        <?php endif; ?>
 
         <!-- Formulaire de connexion -->
         <form method="POST">

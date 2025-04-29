@@ -2,6 +2,8 @@
 session_start(); // Démarrage ou reprise de la session
 require_once("db.php"); // Récupération de la connexion
 
+$error = ""; // Initialisation du message d'erreur
+
 // Vérification si le formulaire a été soumis
 if ($_POST) {
     // Nettoyage des données envoyées via le formulaire
@@ -10,46 +12,45 @@ if ($_POST) {
 
     // Vérification de la validité de l'email
     if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-        echo "Email invalide";
-        exit;
+        $error = "Not valid email.";
+    } else {
+        $check = $pdo->prepare("SELECT * FROM users WHERE email = :email");
+        $check->execute(['email' => $email]);
+
+        // Vérification que l'email n'est pas déjà enregistré en BDD
+        if ($check->rowCount() > 0) {
+            $error = "This email already exists.";
+        } else {
+            // Insertion du nouvel utilisateur en BDD avec mot de passe haché
+            $stmt = $pdo->prepare("INSERT INTO users (email, password) VALUES (:email, :password)");
+            $stmt->execute([
+                'email' => $email,
+                'password' => password_hash($password, PASSWORD_DEFAULT)
+            ]);
+
+            // Récupération du nouvel utilisateur
+            $userId = $pdo->lastInsertId();
+            $stmt = $pdo->prepare("SELECT * FROM users WHERE id = :id");
+            $stmt->execute(['id' => $userId]);
+            $user = $stmt->fetch(PDO::FETCH_ASSOC);
+
+            // Stockage en session
+            $_SESSION["id"] = $user["id"];
+            $_SESSION["email"] = $user["email"];
+
+            // Redirection
+            header("Location: sets.php");
+            exit;
+        }
     }
-
-    // Vérification que l'email n'est pas déjà enregistré en BDD
-    $check = $pdo->prepare("SELECT * FROM users WHERE email = :email");
-    $check->execute(['email' => $email]);
-    if ($check->rowCount() > 0) {
-        echo "This email already exists.";
-        exit;
-    }
-
-    // Insertion du nouvel utilisateur en BDD avec mot de passe haché
-    $stmt = $pdo->prepare("INSERT INTO users (email, password) VALUES (:email, :password)");
-    $stmt->execute([
-        'email' => $email,
-        'password' => password_hash($password, PASSWORD_DEFAULT)
-    ]);
-
-    // Récupération du nouvel utilisateur
-    $userId = $pdo->lastInsertId();
-    $stmt = $pdo->prepare("SELECT * FROM users WHERE id = :id");
-    $stmt->execute(['id' => $userId]);
-    $user = $stmt->fetch(PDO::FETCH_ASSOC);
-
-    // Stockage en session
-    $_SESSION["id"] = $user["id"];
-    $_SESSION["email"] = $user["email"];
-
-    // Redirection
-    header("Location: sets.php");
-    exit;
 }
-?>
+?>  
 
 <!DOCTYPE html>
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <title>Sign in</title>
+    <title>Sign up</title>
     <style>
         /* Réinitialisation de base et styles globaux */
         body {
@@ -148,6 +149,10 @@ if ($_POST) {
     <div class="container">
         <h1>Create account</h1>
 
+        <?php if ($error): ?>
+            <p style="color:red"><?= htmlspecialchars($error) ?></p>
+        <?php endif; ?>
+
         <!-- Formulaire d'inscription -->
         <form method="POST">
             <label for="email">Email:</label>
@@ -160,5 +165,4 @@ if ($_POST) {
         </form>
     </div>
 </body>
-
 </html>
